@@ -1,11 +1,13 @@
-﻿using CommunityToolkit.Mvvm.Input;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
 
 namespace SciCalculator.ViewModels
 {
     [INotifyPropertyChanged]
     internal partial class CalculatorPageViewModel //: ObservableObject, INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler PropertyChanged;
+        //public event PropertyChangedEventHandler PropertyChanged;
 
         [ObservableProperty]
         private string inputText = string.Empty;
@@ -13,7 +15,7 @@ namespace SciCalculator.ViewModels
         [ObservableProperty]
         private string calculatedResult = "0";
 
-        private bool isSciOpwaiting = false;
+        private bool isSciOpWaiting = false;
 
         public CalculatorPageViewModel()
         {
@@ -21,11 +23,11 @@ namespace SciCalculator.ViewModels
         }
 
         [RelayCommand]
-        private void reset()
+        private void Reset()
         {
             CalculatedResult = "0";
             InputText = string.Empty;
-            isSciOpwaiting = false;
+            isSciOpWaiting = false;
         }
 
         [RelayCommand]
@@ -36,22 +38,25 @@ namespace SciCalculator.ViewModels
                 return;
             }
 
-            if (isSciOpwaiting)
+            if (isSciOpWaiting)
             {
                 InputText += ")";
-                isSciOpwaiting = false;
+                isSciOpWaiting = false;
             }
 
             try
             {
                 var inputString = NormalizeInputString();
+                var expression = new Expression(inputString);
+                var result = expression.Evaluate();
+
+                CalculatedResult = result.ToString();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                CalculatedResult = "NaN";
             }
         }
-
 
         private string NormalizeInputString()
         {
@@ -92,7 +97,6 @@ namespace SciCalculator.ViewModels
             }
         }
 
-
         [RelayCommand]
         private void NumberInput(string key)
         {
@@ -102,14 +106,13 @@ namespace SciCalculator.ViewModels
         [RelayCommand]
         private void MathOperator(string op)
         {
-            if (isSciOpwaiting)
+            if (isSciOpWaiting)
             {
                 InputText += ")";
-                isSciOpwaiting = false;
+                isSciOpWaiting = false;
             }
 
             InputText += $" {op} ";
-
         }
 
         [RelayCommand]
@@ -117,7 +120,7 @@ namespace SciCalculator.ViewModels
         {
             if (op == ")")
             {
-                isSciOpwaiting = false;
+                isSciOpWaiting = false;
             }
 
             InputText += op;
@@ -127,8 +130,7 @@ namespace SciCalculator.ViewModels
         private void ScientificOperator(string op)
         {
             InputText += $"{op}(";
-            isSciOpwaiting = true;
+            isSciOpWaiting = true;
         }
-
     }
 }
